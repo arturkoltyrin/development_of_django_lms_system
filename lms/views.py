@@ -4,16 +4,22 @@ from rest_framework.generics import (CreateAPIView, DestroyAPIView,
                                      UpdateAPIView)
 from rest_framework.viewsets import ModelViewSet
 
+from rest_framework.permissions import SAFE_METHODS
 from lms.models import Course, Lesson
 from lms.serializers import CourseSerializer, LessonSerializer
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 from users.permissions import IsOwner, IsModerator
+
 from rest_framework.permissions import IsAdminUser
 
 
 class HomePageView(TemplateView):
     template_name = "home.html"
+
+class IsNotModeratorOrReadOnly(IsModerator):
+    def has_permission(self, request, view):
+        return super().has_permission(request, view) or request.method in SAFE_METHODS
 
 
 class CourseViewSet(viewsets.ModelViewSet):
@@ -22,12 +28,18 @@ class CourseViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated, IsOwner | IsModerator]
 
     def get_permissions(self):
-        # Настраиваем различные права доступа в зависимости от действия
-        if self.action in ['update', 'partial_update']:
-            return [IsAuthenticated(), IsOwner() | IsModerator()]
-        elif self.action in ['create', 'destroy']:
-            return [IsAdminUser()]
-        return super().get_permissions()
+        if self.action == 'create':
+            permission_classes = [IsAuthenticated, ~IsModerator()]  # Простые пользователи могут создавать курсы
+        elif self.action == 'destroy':
+            permission_classes = [IsAuthenticated, IsOwner()]  # Владельцы могут удалять свои курсы
+        else:
+            permission_classes = [IsAuthenticated, IsNotModeratorOrReadOnly()]  # Читать и редактировать может только владелец или никто
+        return [permission() for permission in permission_classes]
+
+    def get_queryset(self):
+        if self.request.user.is_authenticated:
+            return Course.objects.filter(owner=self.request.user)
+        return Course.objects.none()
 
 
 class LessonViewSet(viewsets.ModelViewSet):
@@ -36,11 +48,13 @@ class LessonViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated, IsOwner | IsModerator]
 
     def get_permissions(self):
-        if self.action in ['update', 'partial_update']:
-            return [IsAuthenticated(), IsOwner() | IsModerator()]
-        elif self.action in ['create', 'destroy']:
-            return [IsAdminUser()]
-        return super().get_permissions()
+        if self.action == 'create':
+            permission_classes = [IsAuthenticated, ~IsModerator()]
+        elif self.action == 'destroy':
+            permission_classes = [IsAuthenticated, IsOwner()]
+        else:
+            permission_classes = [IsAuthenticated]
+        return [permission() for permission in permission_classes]
 
 
 # class LessonCreateApiView(CreateAPIView):
