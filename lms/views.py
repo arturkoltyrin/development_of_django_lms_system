@@ -29,11 +29,11 @@ class CourseViewSet(viewsets.ModelViewSet):
 
     def get_permissions(self):
         if self.action == 'create':
-            permission_classes = [IsAuthenticated, ~IsModerator()]  # Простые пользователи могут создавать курсы
+            permission_classes = [IsAuthenticated, ~IsModerator]
         elif self.action == 'destroy':
-            permission_classes = [IsAuthenticated, IsOwner()]  # Владельцы могут удалять свои курсы
+            permission_classes = [IsAuthenticated, IsOwner]
         else:
-            permission_classes = [IsAuthenticated, IsNotModeratorOrReadOnly()]  # Читать и редактировать может только владелец или никто
+            permission_classes = [IsAuthenticated, IsNotModeratorOrReadOnly]
         return [permission() for permission in permission_classes]
 
     def get_queryset(self):
@@ -49,9 +49,9 @@ class LessonViewSet(viewsets.ModelViewSet):
 
     def get_permissions(self):
         if self.action == 'create':
-            permission_classes = [IsAuthenticated, ~IsModerator()]
+            permission_classes = [IsAuthenticated, ~IsModerator]
         elif self.action == 'destroy':
-            permission_classes = [IsAuthenticated, IsOwner()]
+            permission_classes = [IsAuthenticated, IsOwner]
         else:
             permission_classes = [IsAuthenticated]
         return [permission() for permission in permission_classes]
