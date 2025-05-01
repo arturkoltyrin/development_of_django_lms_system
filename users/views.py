@@ -29,12 +29,12 @@ class UserCreateAPIView(CreateAPIView):
 class UserListAPIView(ListAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsModerator]
 
 class UserRetrieveAPIView(RetrieveAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = [IsModerator]
+    permission_classes = [IsAuthenticated, IsOwner | IsModerator]
 
 class UserUpdateAPIView(UpdateAPIView):
     queryset = User.objects.all()

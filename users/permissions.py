@@ -15,7 +15,7 @@ class IsOwner(BasePermission):
 
     def has_object_permission(self, request, view, obj):
         # Проверяем, является ли пользователь владельцем объекта
-        return obj.id == request.user.id or request.user.is_staff
+        return obj.id == request.user
 
 
 class UserViewSet(viewsets.ModelViewSet):
