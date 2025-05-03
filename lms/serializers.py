@@ -1,7 +1,7 @@
 from rest_framework import serializers
-
-from .models import Course, Lesson
-
+from django.contrib.auth.models import AnonymousUser
+from .models import Course, Lesson, Subscription
+from .validators import validate_youtube_link
 
 class LessonSerializer(serializers.ModelSerializer):
     class Meta:
@@ -10,22 +10,21 @@ class LessonSerializer(serializers.ModelSerializer):
 
 
 class CourseSerializer(serializers.ModelSerializer):
-    count_of_lessons = serializers.SerializerMethodField()
-    info_lessons = serializers.SerializerMethodField()
-
-    def get_count_of_lessons(self, obj):
-        return obj.lesson_set.count()
-
-    def get_info_lessons(self, obj):
-        lessons = obj.lesson_set.all()
-        return LessonSerializer(lessons, many=True).data
-
+    is_subscribed = serializers.SerializerMethodField(read_only=True)
+    def get_is_subscribed(self, obj):
+        """Возвращает true, если текущий пользователь подписан на курс"""
+        user = self.context['request'].user
+        if isinstance(user, AnonymousUser):
+            return False
+        return bool(Subscription.objects.filter(user=user, course=obj).first())
     class Meta:
         model = Course
-        fields = (
-            "title",
-            "description",
-            "preview",
-            "count_of_lessons",
-            "info_lessons",
-        )
+        fields = ("id", "title", "description", "preview", "is_subscribed")
+
+class LessonSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Lesson
+        fields = "__all__"
+        validators = [
+            {"video_url": validate_youtube_link}
+        ]

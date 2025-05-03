@@ -25,7 +25,7 @@ class Course(models.Model):
     )
 
     owner = models.ForeignKey(settings.AUTH_USER_MODEL,
-                              on_delete=models.CASCADE, related_name='owned_courses', default=1)
+                              on_delete=models.CASCADE, related_name='owned_courses')
 
     class Meta:
         verbose_name = "Курс"
@@ -80,3 +80,15 @@ class Lesson(models.Model):
 
     def __str__(self):
         return self.title
+
+
+class Subscription(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='subscriptions')
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='subscribers')
+    subscribed_at = models.DateTimeField(auto_now_add=True)
+    class Meta:
+        unique_together = ['user', 'course']
+        verbose_name = "Подписка"
+        verbose_name_plural = "Подписки"
+    def __str__(self):
+        return f'{self.user.email} подписка на {self.course}'
