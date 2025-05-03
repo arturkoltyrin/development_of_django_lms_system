@@ -4,7 +4,11 @@ from rest_framework import filters
 from users.serializers import UserSerializer
 from .models import Payment, User
 from .serializers import PaymentSerializer
-from rest_framework.generics import CreateAPIView
+from rest_framework.generics import (CreateAPIView, ListAPIView, RetrieveAPIView, UpdateAPIView, DestroyAPIView)
+from users.permissions import IsOwner, IsModerator
+from lms.serializers import CourseSerializer
+from lms.models import Course
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 
 class PaymentViewSet(viewsets.ModelViewSet):
     queryset = Payment.objects.all()
@@ -21,3 +25,23 @@ class UserCreateAPIView(CreateAPIView):
         user = serializer.save(is_active=True)
         user.set_password(user.password)
         user.save()
+
+class UserListAPIView(ListAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = [IsAuthenticated, IsModerator]
+
+class UserRetrieveAPIView(RetrieveAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = [IsAuthenticated, IsOwner | IsModerator]
+
+class UserUpdateAPIView(UpdateAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = [IsOwner, IsModerator]
+
+class UserDestroyAPIView(DestroyAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = [IsModerator]
