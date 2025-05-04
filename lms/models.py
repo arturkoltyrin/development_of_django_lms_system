@@ -72,7 +72,7 @@ class Lesson(models.Model):
 
 
     owner = models.ForeignKey(settings.AUTH_USER_MODEL,
-                              on_delete=models.CASCADE, related_name='owned_lessons', default=1)
+                              on_delete=models.CASCADE, related_name='owned_lessons')
 
     class Meta:
         verbose_name = "Урок"

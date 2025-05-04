@@ -9,13 +9,13 @@ class LessonAPITest(TestCase):
         self.user = User.objects.create_user(email='test@test.com', password='password')
         self.client.force_authenticate(user=self.user)
         self.course = Course.objects.create(title='Test Course', owner=self.user)
-
         self.lesson_data = {
             'title': 'Test Lesson',
             'description': 'Описание урока',
-            'picture': '',
-            'video_url': ''}
-        self.lesson = Lesson.objects.create(course=self.course, **self.lesson_data, owner=self.user)
+            'video_url': 'https://www.youtube.com/watch?v=test123',
+            'owner': self.user
+        }
+        self.lesson = Lesson.objects.create(course=self.course, **self.lesson_data)
 
     def test_create_lesson(self):
         response = self.client.post('/api/lessons/', {
