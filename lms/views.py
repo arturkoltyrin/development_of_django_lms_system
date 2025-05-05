@@ -50,7 +50,7 @@ class CourseViewSet(viewsets.ModelViewSet):
 class LessonViewSet(viewsets.ModelViewSet):
     queryset = Lesson.objects.all()
     serializer_class = LessonSerializer
-    permission_classes = [IsAuthenticated, IsOwner | IsModerator]
+    permission_classes = [IsAuthenticated, IsOwner,  IsModerator]
     pagination_class = StandardResultsSetPagination
 
     def get_permissions(self):

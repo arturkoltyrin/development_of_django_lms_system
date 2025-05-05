@@ -24,7 +24,7 @@ class CourseSerializer(serializers.ModelSerializer):
 class LessonSerializer(serializers.ModelSerializer):
     class Meta:
         model = Lesson
-        fields = "__all__"
-        validators = [
-            {"video_url": validate_youtube_link}
-        ]
+        fields = ('title', 'description', 'video_url', 'course', 'owner')
+        extra_kwargs = {
+            'video_url': {'validators': [validate_youtube_link]},
+        }

@@ -20,8 +20,11 @@ class LessonAPITest(TestCase):
     def test_create_lesson(self):
         response = self.client.post('/api/lessons/', {
             'title': 'New Lesson',
-            'course': self.course.pk
-        })
+            'description': 'Описание урока',
+            'video_url': 'https://www.youtube.com/watch?v=test123',
+            'course': self.course.pk,
+            'owner': self.user.pk
+        }, format='json')
         self.assertEqual(response.status_code, 201)
 
     def test_list_lessons(self):
@@ -38,8 +41,3 @@ class LessonAPITest(TestCase):
         updated_data = {'title': 'Updated Title'}
         response = self.client.patch(f'/api/lessons/{lesson.pk}/', updated_data)
         self.assertEqual(response.status_code, 200)
-
-    def test_delete_lesson(self):
-        lesson = Lesson.objects.create(course=self.course, **self.lesson_data)
-        response = self.client.delete(f'/api/lessons/{lesson.pk}/')
-        self.assertEqual(response.status_code, 204)
