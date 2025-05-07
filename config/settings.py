@@ -13,7 +13,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 import os
 from datetime import timedelta
 from pathlib import Path
-
+# from drf_spectacular.openapi import AutoSchema
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     "lms",
     "django_filters",
     "rest_framework_simplejwt",
+    'drf_yasg',
 ]
 
 MIDDLEWARE = [
@@ -79,12 +80,28 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
+
+
+
 REST_FRAMEWORK = {
     "DEFAULT_FILTER_BACKENDS": ["django_filters.rest_framework.DjangoFilterBackend"],
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
-    )
+    ),
+    # 'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
+
+# SPECTACULAR_SETTINGS = {
+#     'TITLE': 'Название вашего API',  # Название вашего API
+#     'DESCRIPTION': 'Краткое описание вашего API.',  # Краткое описание API
+#     'VERSION': '1.0.0',  # Версия API
+#     'SERVE_INCLUDE_SCHEMA': True,  # Обязательная настройка для включения генерации схемы
+#     'SCHEMA_PATH_PREFIX': '/api/',  # Префикс пути к вашим API эндпоинтам
+#     'SWAGGER_UI_DIST': 'SIDECAR',  # Используйте встроенную панель Swagger UI
+#     'SWAGGER_UI_FAVICON_HREF': 'favicon.png',  # Опциональный фавикон
+#     'REDOC_DIST': 'SIDECAR',  # Используйте встроенную панель Redoc
+# }
+
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
@@ -152,3 +169,6 @@ SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=5),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
 }
+
+STRIPE_PUBLISHABLE_KEY = os.getenv("STRIPE_PUBLISHABLE_KEY")
+STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY")
