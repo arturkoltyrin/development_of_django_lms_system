@@ -9,6 +9,8 @@ from users.permissions import IsOwner, IsModerator
 from lms.serializers import CourseSerializer
 from lms.models import Course
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from users.services import create_stripe_price, create_stripe_session, create_stripe_product
+
 
 class PaymentViewSet(viewsets.ModelViewSet):
     queryset = Payment.objects.all()
@@ -45,3 +47,21 @@ class UserDestroyAPIView(DestroyAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = [IsModerator]
+
+
+class PaymentCreateAPIView(CreateAPIView):
+    serializer_class = PaymentSerializer
+    queryset = Payment.objects.all()
+
+    def perform_create(self, serializer):
+        payment = serializer.save(user=self.request.user)
+        course_id = self.request.data.get('course_id')
+        course = Course.objects.all().get(id=course_id)
+        course_title = course.title
+        course_price = course.price
+        stripe_product_id = create_stripe_product(course_title)
+        stripe_price = create_stripe_price(stripe_product_id, course_price)
+        session_id, payment_link = create_stripe_session(stripe_price)
+        payment.session_id = session_id
+        payment.link = payment_link
+        payment.save()
