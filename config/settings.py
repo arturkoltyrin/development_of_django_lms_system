@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     "django_filters",
     "rest_framework_simplejwt",
     'drf_yasg',
+    'django_celery_beat',
 ]
 
 MIDDLEWARE = [
@@ -92,14 +93,14 @@ REST_FRAMEWORK = {
 }
 
 # SPECTACULAR_SETTINGS = {
-#     'TITLE': 'Название вашего API',  # Название вашего API
-#     'DESCRIPTION': 'Краткое описание вашего API.',  # Краткое описание API
-#     'VERSION': '1.0.0',  # Версия API
-#     'SERVE_INCLUDE_SCHEMA': True,  # Обязательная настройка для включения генерации схемы
-#     'SCHEMA_PATH_PREFIX': '/api/',  # Префикс пути к вашим API эндпоинтам
-#     'SWAGGER_UI_DIST': 'SIDECAR',  # Используйте встроенную панель Swagger UI
-#     'SWAGGER_UI_FAVICON_HREF': 'favicon.png',  # Опциональный фавикон
-#     'REDOC_DIST': 'SIDECAR',  # Используйте встроенную панель Redoc
+#     'TITLE': 'Название вашего API',
+#     'DESCRIPTION': 'Краткое описание вашего API.',
+#     'VERSION': '1.0.0',
+#     'SERVE_INCLUDE_SCHEMA': True,
+#     'SCHEMA_PATH_PREFIX': '/api/',
+#     'SWAGGER_UI_DIST': 'SIDECAR',
+#     'SWAGGER_UI_FAVICON_HREF': 'favicon.png',
+#     'REDOC_DIST': 'SIDECAR',
 # }
 
 
@@ -172,3 +173,25 @@ SIMPLE_JWT = {
 
 STRIPE_PUBLISHABLE_KEY = os.getenv("STRIPE_PUBLISHABLE_KEY")
 STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY")
+
+
+CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL")
+CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND")
+CELERY_TIMEZONE = TIME_ZONE
+CELERY_TASK_TRACK_STARTED = True
+CELERY_TASK_TIME_LIMIT = 30 * 60
+CELERY_BEAT_SCHEDULE = {
+    'check_inactive_users': {
+        'task': 'users.tasks.check_inactive_users',
+        'schedule': timedelta(seconds=10), #(каждые 10 минут)
+    },
+}
+
+EMAIL_HOST = os.getenv("EMAIL_HOST")
+EMAIL_PORT = os.getenv("EMAIL_PORT")
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
+EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS")
+
+SERVER_EMAIL = EMAIL_HOST_USER
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
