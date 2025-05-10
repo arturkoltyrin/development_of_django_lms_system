@@ -7,7 +7,7 @@ from django.http import Http404
 from rest_framework.permissions import SAFE_METHODS
 from lms.models import Course, Lesson, Subscription
 from lms.serializers import CourseSerializer, LessonSerializer
-from rest_framework import viewsets
+from rest_framework import viewsets, status
 from rest_framework.permissions import IsAuthenticated
 from users.permissions import IsOwner, IsModerator
 from django.shortcuts import get_object_or_404
@@ -16,6 +16,7 @@ from rest_framework.views import APIView
 from .paginators import StandardResultsSetPagination
 from rest_framework import generics
 from rest_framework.permissions import IsAdminUser
+from users.tasks import sub_update
 
 
 class HomePageView(TemplateView):
@@ -61,6 +62,16 @@ class LessonViewSet(viewsets.ModelViewSet):
         else:
             permission_classes = [IsAuthenticated]
         return [permission() for permission in permission_classes]
+
+    def update(self, request, pk=None):
+        course = get_object_or_404(Course, pk=pk)
+        serializer = self.get_serializer(course, data=request.data, partial=True)
+
+        if serializer.is_valid():
+            serializer.save()
+            sub_update.delay(pk)
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class SubscribeToCourse(APIView):
