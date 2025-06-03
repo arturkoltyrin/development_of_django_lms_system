@@ -20,6 +20,16 @@ python -m venv venv
 4. Запустите сервер разработки:
 python manage.py runserver
 
+## Docker-развёртывание
+
+1. Создайте файл .env:
+
+2. Запустите контейнеры с помощью Docker Compose:
+docker-compose up --build
+
+3. Доступ к интерфейсу:
+После успешной загрузки контейнеров проект станет доступным по адресу: http://localhost:8000.
+
 ## Технологии
 
 - Python — основной язык программирования.
@@ -27,8 +37,6 @@ python manage.py runserver
 - Django REST Framework (DRF) — toolkit для построения REST API.
 - PostgreSQL — база данных.
 - Дополнительные библиотеки (указаны в pyproject.toml).
-
-
 
 ## Установка
 Следуй этим шагам, чтобы установить и запустить проект локально:
