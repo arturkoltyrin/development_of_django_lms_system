@@ -1,22 +1,14 @@
-FROM python:3.11
-
-RUN apt-get update && \
-    apt-get install -y git make build-essential libssl-dev zlib1g-dev libbz2-dev libsqlite3-dev llvm libncurses5-dev libncursesw5-dev xz-utils tk-dev libffi-dev liblzma-dev python3-tk
-
-ENV PYTHONUNBUFFERED=1
+FROM python:3.11-slim
 
 WORKDIR /app
 
+RUN pip install poetry
+
 COPY pyproject.toml poetry.lock ./
 
-# Устанавливаем Poetry и ставим зависимости
-RUN pip install poetry
-RUN poetry install
+RUN poetry config virtualenvs.create false && \
+    poetry install --no-interaction --no-ansi --no-root --only main
 
-# Копируем весь проект
 COPY . .
 
 EXPOSE 8000
-
-# Запускаем сервер
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
