@@ -1,4 +1,5 @@
 from datetime import timedelta
+
 from celery import shared_task
 from django.contrib.auth import get_user_model
 from django.core.mail import send_mail
@@ -6,7 +7,7 @@ from django.utils import timezone
 from rest_framework.generics import get_object_or_404
 
 from config.settings import EMAIL_HOST_USER
-from lms.models import Subscription, Course
+from lms.models import Course, Subscription
 
 
 @shared_task
@@ -31,7 +32,9 @@ def sub_update(pk):
                 subject="Подписка на курс",
                 message=f'Курс "{course.name}" был обновлен',
                 from_email=EMAIL_HOST_USER,
-                recipient_list=[subscriber,],
+                recipient_list=[
+                    subscriber,
+                ],
                 fail_silently=False,
             )
         except Exception as e:

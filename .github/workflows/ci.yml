@@ -47,7 +47,7 @@ jobs:
         poetry install --no-root
 
     - name: Run tests
-      run: python manage.py test
+      run: pytest --cov=. --cov-report html
 
   build:
     needs: test
