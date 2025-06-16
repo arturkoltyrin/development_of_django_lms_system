@@ -1,6 +1,5 @@
-from django.db import models
 from django.conf import settings
-
+from django.db import models
 
 
 class Course(models.Model):
@@ -24,8 +23,9 @@ class Course(models.Model):
         help_text="Загрузите превью",
     )
 
-    owner = models.ForeignKey(settings.AUTH_USER_MODEL,
-                              on_delete=models.CASCADE, related_name='owned_courses')
+    owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="owned_courses"
+    )
 
     class Meta:
         verbose_name = "Курс"
@@ -70,9 +70,9 @@ class Lesson(models.Model):
         help_text="загрузите видео",
     )
 
-
-    owner = models.ForeignKey(settings.AUTH_USER_MODEL,
-                              on_delete=models.CASCADE, related_name='owned_lessons')
+    owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="owned_lessons"
+    )
 
     class Meta:
         verbose_name = "Урок"
@@ -83,12 +83,18 @@ class Lesson(models.Model):
 
 
 class Subscription(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='subscriptions')
-    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='subscribers')
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="subscriptions"
+    )
+    course = models.ForeignKey(
+        Course, on_delete=models.CASCADE, related_name="subscribers"
+    )
     subscribed_at = models.DateTimeField(auto_now_add=True)
+
     class Meta:
-        unique_together = ['user', 'course']
+        unique_together = ["user", "course"]
         verbose_name = "Подписка"
         verbose_name_plural = "Подписки"
+
     def __str__(self):
-        return f'{self.user.email} подписка на {self.course}'
+        return f"{self.user.email} подписка на {self.course}"

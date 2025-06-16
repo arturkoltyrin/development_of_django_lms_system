@@ -1,26 +1,23 @@
-from django.views.generic import TemplateView
-from rest_framework.generics import (CreateAPIView, DestroyAPIView,
-                                     ListAPIView, RetrieveAPIView,
-                                     UpdateAPIView)
-from rest_framework.viewsets import ModelViewSet
 from django.http import Http404
-from rest_framework.permissions import SAFE_METHODS
-from lms.models import Course, Lesson, Subscription
-from lms.serializers import CourseSerializer, LessonSerializer
-from rest_framework import viewsets, status
-from rest_framework.permissions import IsAuthenticated
-from users.permissions import IsOwner, IsModerator
 from django.shortcuts import get_object_or_404
+from django.views.generic import TemplateView
+from rest_framework import status, viewsets
+
+from rest_framework.permissions import (SAFE_METHODS, IsAuthenticated)
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from .paginators import StandardResultsSetPagination
-from rest_framework import generics
-from rest_framework.permissions import IsAdminUser
+
+from lms.models import Course, Lesson, Subscription
+from lms.serializers import CourseSerializer, LessonSerializer
+from users.permissions import IsModerator, IsOwner
 from users.tasks import sub_update
+
+from .paginators import StandardResultsSetPagination
 
 
 class HomePageView(TemplateView):
     template_name = "home.html"
+
 
 class IsNotModeratorOrReadOnly(IsModerator):
     def has_permission(self, request, view):
@@ -34,9 +31,9 @@ class CourseViewSet(viewsets.ModelViewSet):
     pagination_class = StandardResultsSetPagination
 
     def get_permissions(self):
-        if self.action == 'create':
+        if self.action == "create":
             permission_classes = [IsAuthenticated, ~IsModerator]
-        elif self.action == 'destroy':
+        elif self.action == "destroy":
             permission_classes = [IsAuthenticated, IsOwner]
         else:
             permission_classes = [IsAuthenticated, IsNotModeratorOrReadOnly]
@@ -51,13 +48,13 @@ class CourseViewSet(viewsets.ModelViewSet):
 class LessonViewSet(viewsets.ModelViewSet):
     queryset = Lesson.objects.all()
     serializer_class = LessonSerializer
-    permission_classes = [IsAuthenticated, IsOwner,  IsModerator]
+    permission_classes = [IsAuthenticated, IsOwner, IsModerator]
     pagination_class = StandardResultsSetPagination
 
     def get_permissions(self):
-        if self.action == 'create':
+        if self.action == "create":
             permission_classes = [IsAuthenticated, ~IsModerator]
-        elif self.action == 'destroy':
+        elif self.action == "destroy":
             permission_classes = [IsAuthenticated, IsOwner]
         else:
             permission_classes = [IsAuthenticated]
@@ -76,22 +73,19 @@ class LessonViewSet(viewsets.ModelViewSet):
 
 class SubscribeToCourse(APIView):
     def post(self, request, format=None):
-        course_id = request.data.get('course_id')
+        course_id = request.data.get("course_id")
         try:
             course = get_object_or_404(Course, pk=course_id)
         except Http404:
-            return Response({'error': 'Указанный курс не существует'}, status=404)
+            return Response({"error": "Указанный курс не существует"}, status=404)
         subscription = Subscription.objects.filter(user=request.user, course=course)
         if subscription.exists():
             subscription.delete()
-            message = 'Подписка отменена'
+            message = "Подписка отменена"
         else:
             Subscription.objects.create(user=request.user, course=course)
-            message = 'Вы успешно подписались на курс'
-        return Response({'message': message}, status=200)
-
-
-
+            message = "Вы успешно подписались на курс"
+        return Response({"message": message}, status=200)
 
 
 # class LessonCreateApiView(CreateAPIView):

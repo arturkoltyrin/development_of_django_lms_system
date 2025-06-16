@@ -1,14 +1,17 @@
 from rest_framework import viewsets
-from rest_framework.permissions import BasePermission
-from .models import User
+from rest_framework.permissions import BasePermission, IsAuthenticated
+
 from users.serializers import UserSerializer
-from rest_framework.permissions import IsAuthenticated
+
+from .models import User
+
 
 class IsModerator(BasePermission):
     message = "Группа модераторов"
 
     def has_permission(self, request, view):
-        return request.user.groups.filter(name='moderator_group').exists()
+        return request.user.groups.filter(name="moderator_group").exists()
+
 
 class IsOwner(BasePermission):
     message = "Только владелец может редактировать объект"
@@ -23,13 +26,15 @@ class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
 
     def get_permissions(self):
-        if self.action == 'create':  # Регистрация доступна любому пользователю
+        if self.action == "create":  # Регистрация доступна любому пользователю
             permission_classes = []
-        elif self.action == 'retrieve':  # Просмотр любого профиля возможен
+        elif self.action == "retrieve":  # Просмотр любого профиля возможен
             permission_classes = [IsAuthenticated]
-        elif self.action == 'update' or self.action == 'partial_update':  # Редактировать можно только собственный профиль
+        elif (
+            self.action == "update" or self.action == "partial_update"
+        ):  # Редактировать можно только собственный профиль
             permission_classes = [IsAuthenticated, IsOwner()]
-        elif self.action == 'destroy':  # Удаление доступно только самому себе
+        elif self.action == "destroy":  # Удаление доступно только самому себе
             permission_classes = [IsAuthenticated, IsOwner()]
         else:
             permission_classes = [IsAuthenticated]
